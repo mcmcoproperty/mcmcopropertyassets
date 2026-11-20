@@ -1,22 +1,15 @@
 Office.onReady();
 
 function onNewMessageComposeHandler(event) {
-  // Tune stripe look here (all rows share the same thickness so dashes stay aligned):
-  // 5 rows x 10px with 2px overlap = 42px total height
-  var stripeThickness = 10;
-  var stripeRows = 5;
-  var overlapPx = 2;
+  // Repeats your seamless stripes.png horizontally inside the clipped <address> viewport.
+  // If stripes.png is already very wide (e.g. 2000px+), set stripeRepeats = 1.
+  var stripeRepeats = 3;
+  var stripeImg =
+    '<img src="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" height="40" alt="" style="display:inline-block; vertical-align:top; border:none; height:40px; width:auto; max-width:none;">';
 
-  // On Web (Chromium), dashColor renders wider than gapColor.
-  // Swap these two hex values if you want wider cream bands instead.
-  var dashColor = '#4a151b';
-  var gapColor = '#efdfd4';
-
-  var stripeLayersHtml = '';
-  for (var i = 0; i < stripeRows; i++) {
-    var marginTop = i === 0 ? '0' : '-' + overlapPx + 'px';
-    stripeLayersHtml +=
-      '<div style="height:0; padding:0; margin:' + marginTop + ' 0 0 0; font-size:0; line-height:0; border-top:' + stripeThickness + 'px dashed ' + dashColor + '; border-right:none; border-bottom:none; border-left:none;">&zwnj;</div>';
+  var stripesHtml = '';
+  for (var i = 0; i < stripeRepeats; i++) {
+    stripesHtml += stripeImg;
   }
 
   var signatureHtml = [
@@ -62,8 +55,10 @@ function onNewMessageComposeHandler(event) {
     '    </td>',
     '  </tr>',
     '  <tr>',
-    '    <td valign="top" bgcolor="' + gapColor + '" style="background-color:' + gapColor + '; padding:0; line-height:0; font-size:0;">',
-           stripeLayersHtml,
+    '    <td height="40" bgcolor="#4a151b" style="height:40px; max-height:40px; background-color:#4a151b; padding:0; line-height:0; font-size:0; white-space:nowrap;">',
+    '      <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:40px; max-height:40px; overflow:hidden; line-height:0; font-size:0; white-space:nowrap;">',
+             stripesHtml,
+    '      </address>',
     '    </td>',
     '  </tr>',
     '</table>'
