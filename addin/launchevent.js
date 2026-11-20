@@ -38,6 +38,13 @@ function onNewMessageComposeHandler(event) {
       '<address style="display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:8px; max-height:8px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default;"><a name="sig-bg-bottom" style="' + deadLinkStyle + '"><img src="' + srcMap['background.png'] + '" width="335" height="8" alt="" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:8px; cursor:default; pointer-events:none;"></a></address>'
     ].join('');
 
+    // Split 170px into 3 strips (57 + 57 + 56) so each stays under Gmail's image-attachment height threshold
+    var midStackHtml = [
+      '<address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:57px; max-height:57px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default;"><a name="sig-bg-mid-1" style="width:100%; ' + deadLinkStyle + '"><img src="' + srcMap['background.png'] + '" width="60" height="57" alt="" style="display:block; vertical-align:top; border:none; width:100%; min-width:60px; height:57px; cursor:default; pointer-events:none;"></a></address>',
+      '<address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:57px; max-height:57px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default;"><a name="sig-bg-mid-2" style="width:100%; ' + deadLinkStyle + '"><img src="' + srcMap['background.png'] + '" width="60" height="57" alt="" style="display:block; vertical-align:top; border:none; width:100%; min-width:60px; height:57px; cursor:default; pointer-events:none;"></a></address>',
+      '<address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:56px; max-height:56px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default;"><a name="sig-bg-mid-3" style="width:100%; ' + deadLinkStyle + '"><img src="' + srcMap['background.png'] + '" width="60" height="56" alt="" style="display:block; vertical-align:top; border:none; width:100%; min-width:60px; height:56px; cursor:default; pointer-events:none;"></a></address>'
+    ].join('');
+
     var signatureHtml = [
       '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
       '  <tr>',
@@ -56,9 +63,7 @@ function onNewMessageComposeHandler(event) {
       '          </td>',
       // SECTION 2: Dynamic Middle Stretch (auto width, min 60px at 670px, stretches to 100%)
       '          <td height="170" valign="top" bgcolor="#4f1113" style="height:170px; padding:0; background-color:#4f1113; line-height:0; font-size:0;">',
-      '            <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:170px; max-height:170px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default;">',
-      '              <a name="sig-bg-mid" style="width:100%; ' + deadLinkStyle + '"><img src="' + srcMap['background.png'] + '" width="60" height="170" alt="" style="display:block; vertical-align:top; border:none; width:100%; min-width:60px; height:170px; cursor:default; pointer-events:none;"></a>',
-      '            </address>',
+                   midStackHtml,
       '          </td>',
       // SECTION 3: Fixed Right Logo + Margin (260 x 170)
       '          <td width="260" height="170" valign="top" bgcolor="#4f1113" style="width:260px; min-width:260px; max-width:260px; height:170px; padding:0; background-color:#4f1113; line-height:0; font-size:0;">',
