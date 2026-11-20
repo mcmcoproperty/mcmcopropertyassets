@@ -2,9 +2,9 @@ Office.onReady();
 
 function onNewMessageComposeHandler(event) {
   var signatureHtml = [
-    '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
+    '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" background="https://mcmcoproperty.github.io/mcmcopropertyassets/background.png" style="background-color:#4f1113; background-image:url(https://mcmcoproperty.github.io/mcmcopropertyassets/background.png); background-repeat:repeat; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
     '  <tr>',
-    '    <td align="left" bgcolor="#4f1113" background="https://mcmcoproperty.github.io/mcmcopropertyassets/background.png" style="background-color:#4f1113; background-image:url(\'https://mcmcoproperty.github.io/mcmcopropertyassets/background.png\'); background-repeat:repeat; padding:15px 60px 15px 30px;">',
+    '    <td align="left" bgcolor="#4f1113" background="https://mcmcoproperty.github.io/mcmcopropertyassets/background.png" style="background-color:#4f1113; background-image:url(https://mcmcoproperty.github.io/mcmcopropertyassets/background.png); background-repeat:repeat; padding:15px 60px 15px 30px;">',
     '      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%; min-width:580px;">',
     '        <tr>',
     '          <td width="320" align="left" valign="middle" style="width:320px; min-width:320px;">',
@@ -44,7 +44,7 @@ function onNewMessageComposeHandler(event) {
     '    </td>',
     '  </tr>',
     '  <tr>',
-    '    <td height="40" bgcolor="#4a151b" background="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" style="height:40px; background-color:#4a151b; background-image:url(\'https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png\'); background-repeat:repeat-x; background-position:left center; padding:0; line-height:0; font-size:0;">',
+    '    <td height="40" bgcolor="#4a151b" background="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" style="height:40px; background-color:#4a151b; background-image:url(https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png); background-repeat:repeat-x; background-position:left center; padding:0; line-height:0; font-size:0;">',
     '      <img src="https://mcmcoproperty.github.io/mcmcopropertyassets/transparent.png" width="1" height="40" alt="" style="display:block; border:none; height:40px;">',
     '    </td>',
     '  </tr>',
