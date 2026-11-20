@@ -48,7 +48,7 @@ function onNewMessageComposeHandler(event) {
     var signatureHtml = [
       '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
       '  <tr>',
-      '    <td align="left" bgcolor="#4f1113" style="background-color:#4f1113; padding:0; line-height:0; font-size:0;">',
+      '    <td width="100%" align="left" bgcolor="#4f1113" style="width:100%; background-color:#4f1113; padding:0; line-height:0; font-size:0;">',
       '      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; line-height:0; font-size:0;">',
       '        <tr>',
       // SECTION 1A: Left 15px padding spacer (15 x 170)
@@ -78,8 +78,8 @@ function onNewMessageComposeHandler(event) {
       '    </td>',
       '  </tr>',
       '  <tr>',
-      '    <td height="40" bgcolor="#4a151b" style="height:40px; max-height:40px; background-color:#4a151b; padding:0; line-height:0; font-size:0;">',
-      '      <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:40px; max-height:40px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;">',
+      '    <td width="100%" height="40" bgcolor="#4a151b" style="width:100%; height:40px; max-height:40px; background-color:#4a151b; padding:0; line-height:0; font-size:0;">',
+      '      <address style="display:block; font-style:normal; margin:0; padding:0; width:670px; min-width:100%; height:40px; max-height:40px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;">',
                stripeImg,
       '      </address>',
       '    </td>',
