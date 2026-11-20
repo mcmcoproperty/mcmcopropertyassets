@@ -1,25 +1,50 @@
 Office.onReady();
 
+// Per-employee directory keyed by lowercase Microsoft 365 email address.
+// Shared assets (stripes, background, web, address, logo) stay in the root folder.
+// For future staff, set folder to e.g. 'staff/james/' and upload their sig-header.png and sig-phone.png there.
+var STAFF = {
+  'louise@mcmanuscoproperty.com': {
+    folder: 'staff/louise/',
+    headerAlt: 'Louise Craighill - Chief Financial Officer',
+    phoneHref: 'tel:+61422726186',
+    phoneAlt: '+61 422 726 186'
+  }
+};
+
 function onNewMessageComposeHandler(event) {
+  var userProfile = Office.context.mailbox && Office.context.mailbox.userProfile;
+  var userEmail = (userProfile && userProfile.emailAddress ? userProfile.emailAddress : '').trim().toLowerCase();
+  var person = Object.prototype.hasOwnProperty.call(STAFF, userEmail) ? STAFF[userEmail] : null;
+
+  // Unknown employee: exit cleanly without attaching images or injecting a wrong signature
+  if (!person) {
+    console.warn('No signature configured for:', userEmail || '(unknown user)');
+    event.completed();
+    return;
+  }
+
   // stripes.png is 3000x1 (native 12px stripes).
   // Keep imgWidth = 3000 for exact 12px stripes (or scale proportionally, e.g. 2500 for 10px stripes).
   var imgWidth = 3000;
   var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/';
+  var personBase = base + (person.folder || '');
 
+  // Keep `name` as a plain filename (no slashes) for valid cid: references
   var files = [
-    'stripes.png',
-    'background.png',
-    'sig-header.png',
-    'sig-phone.png',
-    'sig-web.png',
-    'sig-address.png',
-    'sig-logo.png'
+    { name: 'stripes.png',     url: base + 'stripes.png' },
+    { name: 'background.png',  url: base + 'background.png' },
+    { name: 'sig-header.png',  url: personBase + 'sig-header.png' },
+    { name: 'sig-phone.png',   url: personBase + 'sig-phone.png' },
+    { name: 'sig-web.png',     url: base + 'sig-web.png' },
+    { name: 'sig-address.png', url: base + 'sig-address.png' },
+    { name: 'sig-logo.png',    url: base + 'sig-logo.png' }
   ];
 
   // Default to external URLs; switch each to cid: once attached inline
   var srcMap = {};
   for (var i = 0; i < files.length; i++) {
-    srcMap[files[i]] = base + files[i];
+    srcMap[files[i].name] = files[i].url;
   }
 
   function insertSignature() {
@@ -31,8 +56,8 @@ function onNewMessageComposeHandler(event) {
 
     var leftStackHtml = [
       '<address style="display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:15px; max-height:15px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-bg-top" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['background.png'] + '" width="335" height="15" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:15px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
-      '<address style="display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:69px; max-height:69px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-header" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-header.png'] + '" width="335" height="69" alt="Louise Craighill - Chief Financial Officer" draggable="false" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:69px; font-size:16px; line-height:22px; color:#efdfd4; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
-      '<address style="' + linkRowStyle + '"><a href="tel:+61422726186" style="display:block; border:none; text-decoration:none; line-height:0; font-size:0;"><img src="' + srcMap['sig-phone.png'] + '" width="335" height="26" alt="+61 422 726 186" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:26px; font-size:12px; line-height:26px; color:#efdfd4;"></a></address>',
+      '<address style="display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:69px; max-height:69px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-header" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-header.png'] + '" width="335" height="69" alt="' + person.headerAlt + '" draggable="false" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:69px; font-size:16px; line-height:22px; color:#efdfd4; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
+      '<address style="' + linkRowStyle + '"><a href="' + person.phoneHref + '" style="display:block; border:none; text-decoration:none; line-height:0; font-size:0;"><img src="' + srcMap['sig-phone.png'] + '" width="335" height="26" alt="' + person.phoneAlt + '" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:26px; font-size:12px; line-height:26px; color:#efdfd4;"></a></address>',
       '<address style="' + linkRowStyle + '"><a href="https://mcmanuscoproperty.com.au" style="display:block; border:none; text-decoration:none; line-height:0; font-size:0;"><img src="' + srcMap['sig-web.png'] + '" width="335" height="26" alt="mcmanuscoproperty.com.au" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:26px; font-size:12px; line-height:26px; color:#efdfd4;"></a></address>',
       '<address style="' + linkRowStyle + '"><a href="https://maps.google.com/?q=48+Sailors+Bay+Road,+Northbridge+NSW+2063" style="display:block; border:none; text-decoration:none; line-height:0; font-size:0;"><img src="' + srcMap['sig-address.png'] + '" width="335" height="26" alt="48 Sailors Bay Road, Northbridge NSW 2063" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:26px; font-size:12px; line-height:26px; color:#efdfd4;"></a></address>',
       '<address style="display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:8px; max-height:8px; overflow:hidden; line-height:0; font-size:0; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-bg-bottom" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['background.png'] + '" width="335" height="8" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:335px; min-width:335px; max-width:335px; height:8px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>'
@@ -107,16 +132,16 @@ function onNewMessageComposeHandler(event) {
 
   var remaining = files.length;
 
-  function attachFile(fileName) {
+  function attachFile(file) {
     item.addFileAttachmentAsync(
-      base + fileName,
-      fileName,
+      file.url,
+      file.name,
       { isInline: true },
       function (result) {
         if (result.status === Office.AsyncResultStatus.Succeeded) {
-          srcMap[fileName] = 'cid:' + fileName;
+          srcMap[file.name] = 'cid:' + file.name;
         } else {
-          console.error('addFileAttachmentAsync failed for ' + fileName + ':', result.error.message);
+          console.error('addFileAttachmentAsync failed for ' + file.name + ':', result.error.message);
         }
         remaining--;
         if (remaining === 0) {
