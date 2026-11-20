@@ -9,7 +9,7 @@ function onNewMessageComposeHandler(event) {
     '        <tr>',
     '          <td width="320" align="left" valign="middle" style="width:320px; min-width:320px;">',
     '            <table cellpadding="0" cellspacing="0" border="0" style="color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif;">',
-    '              <tr><td style="font-size:22px; font-weight:normal; letter-spacing:0.5px; white-space:nowrap;">Louise&nbsp;Craighill</td></tr>',
+    '              <tr><td style="font-size:22px; font-weight:normal; letter-spacing:0.5px; white-space:nowrap;">Louis&nbsp;Craighill</td></tr>',
     '              <tr><td style="font-size:13px; font-style:italic; padding-bottom:25px; white-space:nowrap;">Chief&nbsp;Financial&nbsp;Officer</td></tr>',
     '              <tr><td>',
     '                <table cellpadding="0" cellspacing="0" border="0" style="font-size:12px; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif;">',
