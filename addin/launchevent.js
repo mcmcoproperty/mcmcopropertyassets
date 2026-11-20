@@ -1,6 +1,25 @@
 Office.onReady();
 
 function onNewMessageComposeHandler(event) {
+  // Adjust stripe size while keeping total height = 40px:
+  // Narrower stripes: thickness = 4, rows = 10
+  // Medium stripes:   thickness = 5, rows = 8
+  // Wider stripes:    thickness = 8, rows = 5
+  var stripeThickness = 5;
+  var stripeRows = 8;
+
+  var stripeRow =
+    '<tr>' +
+      '<td bgcolor="#4a151b" style="height:0; padding:0; font-size:0; line-height:0; background-color:#4a151b; border-top:' + stripeThickness + 'px dashed #efdfd4; border-right:none; border-bottom:none; border-left:none;">' +
+        '<div style="height:0; font-size:0; line-height:0;">&nbsp;</div>' +
+      '</td>' +
+    '</tr>';
+
+  var stripeRowsHtml = '';
+  for (var i = 0; i < stripeRows; i++) {
+    stripeRowsHtml += stripeRow;
+  }
+
   var signatureHtml = [
     '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
     '  <tr>',
@@ -44,10 +63,10 @@ function onNewMessageComposeHandler(event) {
     '    </td>',
     '  </tr>',
     '  <tr>',
-    '    <td height="40" bgcolor="#4a151b" style="height:40px; max-height:40px; background-color:#4a151b; padding:0; overflow:hidden; line-height:0; font-size:0;">',
-    '      <div style="width:100%; height:40px; max-height:40px; overflow:hidden; line-height:0; font-size:0;">',
-    '        <img src="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" height="40" alt="" style="display:block; border:none; height:40px; width:auto; max-width:none;">',
-    '      </div>',
+    '    <td height="40" bgcolor="#4a151b" style="height:40px; background-color:#4a151b; padding:0; line-height:0; font-size:0;">',
+    '      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4a151b" style="width:100%; border-collapse:separate; background-color:#4a151b; line-height:0; font-size:0;">',
+             stripeRowsHtml,
+    '      </table>',
     '    </td>',
     '  </tr>',
     '</table>'
