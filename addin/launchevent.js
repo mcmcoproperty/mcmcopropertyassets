@@ -64,3 +64,14 @@ function onNewMessageComposeHandler(event) {
 
   Office.context.mailbox.item.body.setSignatureAsync(
     signatureHtml,
+    { coercionType: Office.CoercionType.Html },
+    function (result) {
+      if (result.status === Office.AsyncResultStatus.Failed) {
+        console.error('setSignatureAsync failed:', result.error.message);
+      }
+      event.completed();
+    }
+  );
+}
+
+Office.actions.associate('onNewMessageComposeHandler', onNewMessageComposeHandler);
