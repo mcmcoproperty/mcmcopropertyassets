@@ -1,23 +1,22 @@
 Office.onReady();
 
 function onNewMessageComposeHandler(event) {
-  // Adjust stripe size while keeping total height = 40px:
-  // Narrower stripes: thickness = 4, rows = 10
-  // Medium stripes:   thickness = 5, rows = 8
-  // Wider stripes:    thickness = 8, rows = 5
-  var stripeThickness = 5;
-  var stripeRows = 8;
+  // Tune stripe look here (all rows share the same thickness so dashes stay aligned):
+  // 5 rows x 10px with 2px overlap = 42px total height
+  var stripeThickness = 10;
+  var stripeRows = 5;
+  var overlapPx = 2;
 
-  var stripeRow =
-    '<tr>' +
-      '<td bgcolor="#4a151b" style="height:0; padding:0; font-size:0; line-height:0; background-color:#4a151b; border-top:' + stripeThickness + 'px dashed #efdfd4; border-right:none; border-bottom:none; border-left:none;">' +
-        '<div style="height:0; font-size:0; line-height:0;">&nbsp;</div>' +
-      '</td>' +
-    '</tr>';
+  // On Web (Chromium), dashColor renders wider than gapColor.
+  // Swap these two hex values if you want wider cream bands instead.
+  var dashColor = '#4a151b';
+  var gapColor = '#efdfd4';
 
-  var stripeRowsHtml = '';
+  var stripeLayersHtml = '';
   for (var i = 0; i < stripeRows; i++) {
-    stripeRowsHtml += stripeRow;
+    var marginTop = i === 0 ? '0' : '-' + overlapPx + 'px';
+    stripeLayersHtml +=
+      '<div style="height:0; padding:0; margin:' + marginTop + ' 0 0 0; font-size:0; line-height:0; border-top:' + stripeThickness + 'px dashed ' + dashColor + '; border-right:none; border-bottom:none; border-left:none;">&zwnj;</div>';
   }
 
   var signatureHtml = [
@@ -63,10 +62,8 @@ function onNewMessageComposeHandler(event) {
     '    </td>',
     '  </tr>',
     '  <tr>',
-    '    <td height="40" bgcolor="#4a151b" style="height:40px; background-color:#4a151b; padding:0; line-height:0; font-size:0;">',
-    '      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4a151b" style="width:100%; border-collapse:separate; background-color:#4a151b; line-height:0; font-size:0;">',
-             stripeRowsHtml,
-    '      </table>',
+    '    <td valign="top" bgcolor="' + gapColor + '" style="background-color:' + gapColor + '; padding:0; line-height:0; font-size:0;">',
+           stripeLayersHtml,
     '    </td>',
     '  </tr>',
     '</table>'
