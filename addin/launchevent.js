@@ -93,8 +93,8 @@ function onNewMessageComposeHandler(event) {
       // SECTION 3: Fixed Right Logo + Margin (260 x 170)
       '          <td width="260" height="170" valign="top" bgcolor="#4f1113" style="width:260px; min-width:260px; max-width:260px; height:170px; padding:0; background-color:#4f1113; line-height:0; font-size:0;">',
       '            <address style="display:block; font-style:normal; margin:0; padding:0; width:260px; max-width:260px; height:170px; max-height:170px; overflow:hidden; background-color:#4f1113; line-height:0; font-size:0; white-space:nowrap;">',
-      '              <a href="https://mcmanuscoproperty.com.au" style="display:block; border:none; text-decoration:none; line-height:0; font-size:0;">',
-      '                <img src="' + srcMap['sig-logo.png'] + '" width="260" height="170" alt="McManus &amp; Co Property" style="display:block; vertical-align:top; border:none; width:260px; min-width:260px; max-width:260px; height:170px; font-size:14px; line-height:20px; color:#efdfd4;">',
+      '              <a href="https://mcmanuscoproperty.com.au" style="display:block; border:none; text-decoration:none; background-color:#4f1113; line-height:0; font-size:0;">',
+      '                <img src="' + srcMap['sig-logo.png'] + '" width="260" height="170" alt="McManus &amp; Co Property" style="display:block; vertical-align:top; border:none; width:260px; min-width:260px; max-width:260px; height:170px; background-color:#4f1113; font-size:14px; line-height:20px; color:#efdfd4;">',
       '              </a>',
       '            </address>',
       '          </td>',
