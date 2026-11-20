@@ -1,18 +1,12 @@
 Office.onReady();
 
 function onNewMessageComposeHandler(event) {
-  // Adjust tileWidth to control stripe thickness (in px).
-  // Repeats auto-calculate to cover screens up to 2400px wide.
-  var tileWidth = 24;
-  var stripeRepeats = Math.ceil(2400 / tileWidth);
+  // stripes.png is 3000x1 (native 12px stripes).
+  // Keep imgWidth = 3000 for exact 12px stripes (or scale proportionally, e.g. 2500 for 10px stripes).
+  var imgWidth = 3000;
 
   var stripeImg =
-    '<img src="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" width="' + tileWidth + '" height="40" alt="" style="display:inline-block; vertical-align:top; border:none; width:' + tileWidth + 'px; min-width:' + tileWidth + 'px; max-width:' + tileWidth + 'px; height:40px;">';
-
-  var stripesHtml = '';
-  for (var i = 0; i < stripeRepeats; i++) {
-    stripesHtml += stripeImg;
-  }
+    '<img src="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" width="' + imgWidth + '" height="40" alt="" style="display:block; border:none; width:' + imgWidth + 'px; min-width:' + imgWidth + 'px; max-width:none; height:40px;">';
 
   var signatureHtml = [
     '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
@@ -57,9 +51,9 @@ function onNewMessageComposeHandler(event) {
     '    </td>',
     '  </tr>',
     '  <tr>',
-    '    <td height="40" bgcolor="#4a151b" style="height:40px; max-height:40px; background-color:#4a151b; padding:0; line-height:0; font-size:0; white-space:nowrap;">',
-    '      <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:40px; max-height:40px; overflow:hidden; line-height:0; font-size:0; white-space:nowrap;">',
-             stripesHtml,
+    '    <td height="40" bgcolor="#4a151b" style="height:40px; max-height:40px; background-color:#4a151b; padding:0; line-height:0; font-size:0;">',
+    '      <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:40px; max-height:40px; overflow:hidden; line-height:0; font-size:0;">',
+             stripeImg,
     '      </address>',
     '    </td>',
     '  </tr>',
