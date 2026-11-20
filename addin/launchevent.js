@@ -1,11 +1,13 @@
 Office.onReady();
 
 function onNewMessageComposeHandler(event) {
-  // Repeats your seamless stripes.png horizontally inside the clipped <address> viewport.
-  // If stripes.png is already very wide (e.g. 2000px+), set stripeRepeats = 1.
-  var stripeRepeats = 3;
+  // Adjust tileWidth to control stripe thickness (in px).
+  // Repeats auto-calculate to cover screens up to 2400px wide.
+  var tileWidth = 24;
+  var stripeRepeats = Math.ceil(2400 / tileWidth);
+
   var stripeImg =
-    '<img src="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" height="40" alt="" style="display:inline-block; vertical-align:top; border:none; height:40px; width:auto; max-width:none;">';
+    '<img src="https://mcmcoproperty.github.io/mcmcopropertyassets/stripes.png" width="' + tileWidth + '" height="40" alt="" style="display:inline-block; vertical-align:top; border:none; width:' + tileWidth + 'px; min-width:' + tileWidth + 'px; max-width:' + tileWidth + 'px; height:40px;">';
 
   var stripesHtml = '';
   for (var i = 0; i < stripeRepeats; i++) {
