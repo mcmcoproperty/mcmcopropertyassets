@@ -7,7 +7,7 @@
   xsi:type="MailApp">
 
   <Id>8a4c2d19-7e51-4b83-9c2a-6f1e4d90b3c7</Id>
-  <Version>1.0.0.0</Version>
+  <Version>1.1.0.0</Version>
   <ProviderName>McManus &amp; Co Property</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="McManus Signature" />
@@ -64,9 +64,11 @@
           </Runtimes>
 
           <DesktopFormFactor>
+            <SupportsSharedFolders>true</SupportsSharedFolders>
             <ExtensionPoint xsi:type="LaunchEvent">
               <LaunchEvents>
                 <LaunchEvent Type="OnNewMessageCompose" FunctionName="onNewMessageComposeHandler" />
+                <LaunchEvent Type="OnMessageFromChanged" FunctionName="onMessageFromChangedHandler" />
               </LaunchEvents>
               <SourceLocation resid="WebViewRuntime.Url" />
             </ExtensionPoint>
@@ -76,6 +78,7 @@
             <ExtensionPoint xsi:type="LaunchEvent">
               <LaunchEvents>
                 <LaunchEvent Type="OnNewMessageCompose" FunctionName="onNewMessageComposeHandler" />
+                <LaunchEvent Type="OnMessageFromChanged" FunctionName="onMessageFromChangedHandler" />
               </LaunchEvents>
               <SourceLocation resid="WebViewRuntime.Url" />
             </ExtensionPoint>
