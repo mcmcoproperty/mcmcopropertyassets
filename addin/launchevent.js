@@ -75,6 +75,114 @@ function arrayBufferToBase64(buffer) {
   return out;
 }
 
+function extractTextStyleFromCss(cssText, fallbackSize) {
+  if (!cssText) {
+    return null;
+  }
+
+  var famMatch = cssText.match(/font-family\s*:\s*([^;]+)/i);
+  if (!famMatch) {
+    return null;
+  }
+
+  var fontFamily = famMatch[1].trim().replace(/"/g, "'").replace(/[<>]/g, '');
+  if (!fontFamily || /century gothic/i.test(fontFamily)) {
+    return null;
+  }
+
+  var sizeMatch = cssText.match(/font-size\s*:\s*([^;]+)/i);
+  var fontSize = sizeMatch ? sizeMatch[1].trim().replace(/["'<>]/g, '') : (fallbackSize || '');
+  if (/^0+(?:\.0+)?(?:px|pt|em|rem|%)?$/i.test(fontSize)) {
+    fontSize = fallbackSize || '';
+  }
+
+  var colorMatch = cssText.match(/(?:^|[;\s])color\s*:\s*([^;]+)/i);
+  var color = colorMatch ? colorMatch[1].trim().replace(/["'<>]/g, '') : '';
+  if (!color || /^(windowtext|inherit|initial|auto)$/i.test(color)) {
+    color = '#000000';
+  }
+
+  var out = 'font-family:' + fontFamily + ';';
+  if (fontSize) {
+    out += ' font-size:' + fontSize + ';';
+  }
+  out += ' color:' + color + ';';
+  return out;
+}
+
+function detectDefaultTextStyle(item, callback) {
+  var fallback = 'font-family:Aptos, Calibri, Helvetica, Arial, sans-serif; font-size:12pt; color:#000000;';
+
+  if (!item || !item.body || typeof item.body.getAsync !== 'function') {
+    callback(fallback);
+    return;
+  }
+
+  item.body.getAsync(Office.CoercionType.Html, function (result) {
+    if (result.status !== Office.AsyncResultStatus.Succeeded || !result.value) {
+      callback(fallback);
+      return;
+    }
+
+    var html = result.value;
+
+    // Inspect only the user's compose area above any existing signature or quoted thread
+    var bodyStart = html.search(/<body\b[^>]*>/i);
+    var bodyContent = bodyStart !== -1 ? html.slice(bodyStart) : html;
+    var cutIdx = bodyContent.search(/id=["']?(?:x_)?(?:Signature|appendonsend|divRplyFwdMsg)["']?|<blockquote\b/i);
+    if (cutIdx !== -1) {
+      bodyContent = bodyContent.slice(0, cutIdx);
+    }
+
+    // 1. Outlook Web / New Outlook / Mac: check the initial elementToProof compose wrapper
+    var etpMatch =
+      bodyContent.match(/<[^>]*elementToProof[^>]*style="([^"]*)"/i) ||
+      bodyContent.match(/<[^>]*style="([^"]*)"[^>]*elementToProof/i);
+    if (etpMatch) {
+      var etpStyle = extractTextStyleFromCss(etpMatch[1]);
+      if (etpStyle) {
+        callback(etpStyle);
+        return;
+      }
+    }
+
+    // 2. Fallback scan of inline style attributes inside the compose area
+    var styleRegex = /style="([^"]*)"/gi;
+    var m;
+    while ((m = styleRegex.exec(bodyContent)) !== null) {
+      var inlineStyle = extractTextStyleFromCss(m[1]);
+      if (inlineStyle) {
+        callback(inlineStyle);
+        return;
+      }
+    }
+
+    // 3. Classic Outlook (Windows): read Word HTML stylesheet rules (EmailStyle / MsoNormal)
+    var msoMatch = html.match(/MsoNormal[^{]*\{([^}]*)\}/i);
+    var msoSizeMatch = msoMatch ? msoMatch[1].match(/font-size\s*:\s*([^;]+)/i) : null;
+    var msoSize = msoSizeMatch ? msoSizeMatch[1].trim().replace(/["'<>]/g, '') : '';
+
+    var emailStyleMatch = html.match(/EmailStyle\d+[^{]*\{([^}]*)\}/i);
+    if (emailStyleMatch) {
+      var emailCssStyle = extractTextStyleFromCss(emailStyleMatch[1], msoSize);
+      if (emailCssStyle) {
+        callback(emailCssStyle);
+        return;
+      }
+    }
+
+    if (msoMatch) {
+      var msoStyle = extractTextStyleFromCss(msoMatch[1]);
+      if (msoStyle) {
+        callback(msoStyle);
+        return;
+      }
+    }
+
+    callback(fallback);
+  });
+}
+
 function resolveSenderEmail(item, callback) {
   var userProfile = Office.context.mailbox && Office.context.mailbox.userProfile;
   var fallbackEmail = (userProfile && userProfile.emailAddress ? userProfile.emailAddress : '').trim().toLowerCase();
@@ -175,6 +283,8 @@ function applySignature(event, isFromChanged) {
       srcMap[files[i].name] = files[i].url;
     }
 
+    var sigTextStyle = 'font-family:Aptos, Calibri, Helvetica, Arial, sans-serif; font-size:12pt; color:#000000;';
+
     function insertSignature() {
       var deadLinkStyle = 'display:block; border:none; text-decoration:none; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; line-height:0; font-size:0;';
       var linkRowStyle = 'display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:26px; max-height:26px; overflow:hidden; line-height:0; font-size:0; white-space:nowrap;';
@@ -199,9 +309,9 @@ function applySignature(event, isFromChanged) {
       ].join('');
 
       var signatureHtml = [
-        '<div style="color:#000000;"><br></div>',
-        '<div style="color:#000000;">Kind regards,</div>',
-        '<div style="color:#000000;"><br></div>',
+        '<div style="' + sigTextStyle + '"><br></div>',
+        '<div style="' + sigTextStyle + '">Kind regards,</div>',
+        '<div style="' + sigTextStyle + '"><br></div>',
         '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
         '  <tr>',
         '    <td width="100%" align="left" bgcolor="#4f1113" style="width:100%; background-color:#4f1113; padding:0; line-height:0; font-size:0;">',
@@ -349,11 +459,14 @@ function applySignature(event, isFromChanged) {
       }
     }
 
-    if (isFromChanged) {
-      removeExistingSignatureAttachments(item, attachAllAndInsert);
-    } else {
-      attachAllAndInsert();
-    }
+    detectDefaultTextStyle(item, function (detectedStyle) {
+      sigTextStyle = detectedStyle;
+      if (isFromChanged) {
+        removeExistingSignatureAttachments(item, attachAllAndInsert);
+      } else {
+        attachAllAndInsert();
+      }
+    });
   });
 }
 
