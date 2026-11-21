@@ -199,6 +199,9 @@ function applySignature(event, isFromChanged) {
       ].join('');
 
       var signatureHtml = [
+        '<div><br></div>',
+        '<div>Kind regards,</div>',
+        '<div><br></div>',
         '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
         '  <tr>',
         '    <td width="100%" align="left" bgcolor="#4f1113" style="width:100%; background-color:#4f1113; padding:0; line-height:0; font-size:0;">',
