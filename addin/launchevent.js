@@ -178,7 +178,6 @@ function applySignature(event, isFromChanged) {
     function insertSignature() {
       var deadLinkStyle = 'display:block; border:none; text-decoration:none; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; line-height:0; font-size:0;';
       var linkRowStyle = 'display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:26px; max-height:26px; overflow:hidden; line-height:0; font-size:0; white-space:nowrap;';
-      var sigTextStyle = 'font-family:Arial, Helvetica, sans-serif; font-size:11pt;';
 
       var stripeImg =
         '<a name="sig-stripes" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-stripes.png'] + '" width="' + imgWidth + '" height="40" alt="" draggable="false" style="display:block; border:none; width:' + imgWidth + 'px; min-width:' + imgWidth + 'px; max-width:none; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a>';
@@ -200,9 +199,9 @@ function applySignature(event, isFromChanged) {
       ].join('');
 
       var signatureHtml = [
-        '<div style="' + sigTextStyle + '"><br></div>',
-        '<div style="' + sigTextStyle + '">Kind regards,</div>',
-        '<div style="' + sigTextStyle + '"><br></div>',
+        '<div style="color:#000000;"><br></div>',
+        '<div style="color:#000000;">Kind regards,</div>',
+        '<div style="color:#000000;"><br></div>',
         '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
         '  <tr>',
         '    <td width="100%" align="left" bgcolor="#4f1113" style="width:100%; background-color:#4f1113; padding:0; line-height:0; font-size:0;">',
