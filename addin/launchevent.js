@@ -56,8 +56,6 @@ var STAFF = {
 
 var SIG_FILE_NAMES = {
   'sig-stripes.png': true,
-  'sig-stripes-base.png': true,
-  'sig-stripes-ext.png': true,
   'sig-background.png': true,
   'sig-bg-pad.png': true,
   'sig-header.png': true,
@@ -269,24 +267,22 @@ function applySignature(event, isFromChanged) {
       return;
     }
 
-    // Stripes split at x=669: Classic Outlook ignores inline-block span width & percentage img width (capping at 669 + 1 = 670px),
-    // while modern clients expand the 2331px span and clip cleanly at the container edge.
-    var stripeBaseWidth = 669;
-    var stripeExtWidth = 2331;
+    // sig-stripes.png is 3000x1 (native 12px stripes).
+    // Keep imgWidth = 3000 for exact 12px stripes (or scale proportionally, e.g. 2500 for 10px stripes).
+    var imgWidth = 3000;
     var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v1/';
     var personBase = base + (person.folder || '');
 
     // Keep `name` as a plain filename (no slashes) for valid cid: references
     var files = [
-      { name: 'sig-stripes-base.png', url: base + 'sig-stripes-base.png' },
-      { name: 'sig-stripes-ext.png',  url: base + 'sig-stripes-ext.png' },
-      { name: 'sig-background.png',   url: base + 'sig-background.png' },
-      { name: 'sig-bg-pad.png',       url: base + 'sig-bg-pad.png' },
-      { name: 'sig-header.png',       url: personBase + 'sig-header.png' },
-      { name: 'sig-phone.png',        url: personBase + 'sig-phone.png' },
-      { name: 'sig-web.png',          url: base + 'sig-web.png' },
-      { name: 'sig-address.png',      url: base + 'sig-address.png' },
-      { name: 'sig-logo.png',         url: base + 'sig-logo.png' }
+      { name: 'sig-stripes.png',     url: base + 'sig-stripes.png' },
+      { name: 'sig-background.png',  url: base + 'sig-background.png' },
+      { name: 'sig-bg-pad.png',      url: base + 'sig-bg-pad.png' },
+      { name: 'sig-header.png',      url: personBase + 'sig-header.png' },
+      { name: 'sig-phone.png',       url: personBase + 'sig-phone.png' },
+      { name: 'sig-web.png',         url: base + 'sig-web.png' },
+      { name: 'sig-address.png',     url: base + 'sig-address.png' },
+      { name: 'sig-logo.png',        url: base + 'sig-logo.png' }
     ];
 
     // Default to external URLs; switch each to cid: once attached inline
@@ -302,19 +298,8 @@ function applySignature(event, isFromChanged) {
       var linkRowTdStyle = 'width:335px; min-width:335px; max-width:335px; height:26px; padding:0; background-color:#4f1113; line-height:26px; mso-line-height-rule:exactly; font-size:1px;';
       var linkRowStyle = 'display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:26px; max-height:26px; overflow:hidden; line-height:26px; mso-line-height-rule:exactly; font-size:1px; white-space:nowrap;';
 
-      // 2-column stripes bar: 669px fixed base + fluid extension (1px in Classic Outlook, clipped 2331px in modern clients)
-      var stripesHtml = [
-        '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; background-color:#4f1113;">',
-        '  <tr>',
-        '    <td width="' + stripeBaseWidth + '" height="40" valign="top" bgcolor="#4f1113" style="width:' + stripeBaseWidth + 'px; min-width:' + stripeBaseWidth + 'px; max-width:' + stripeBaseWidth + 'px; height:40px; padding:0; background-color:#4f1113; line-height:40px; mso-line-height-rule:exactly; font-size:1px;">',
-        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:' + stripeBaseWidth + 'px; max-width:' + stripeBaseWidth + 'px; height:40px; max-height:40px; overflow:hidden; line-height:40px; mso-line-height-rule:exactly; font-size:1px; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-stripes-base" draggable="false" style="' + deadLinkStyle + ' line-height:40px;"><img src="' + srcMap['sig-stripes-base.png'] + '" width="' + stripeBaseWidth + '" height="40" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:' + stripeBaseWidth + 'px; min-width:' + stripeBaseWidth + 'px; max-width:' + stripeBaseWidth + 'px; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
-        '    </td>',
-        '    <td height="40" valign="top" bgcolor="#4f1113" style="height:40px; padding:0; background-color:#4f1113; line-height:40px; mso-line-height-rule:exactly; font-size:1px;">',
-        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:40px; max-height:40px; overflow:hidden; line-height:40px; mso-line-height-rule:exactly; font-size:1px; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-stripes-ext" draggable="false" style="' + deadLinkStyle + ' line-height:40px;"><span style="display:inline-block; width:' + stripeExtWidth + 'px; min-width:' + stripeExtWidth + 'px; height:40px; vertical-align:top; line-height:40px; font-size:1px;"><img src="' + srcMap['sig-stripes-ext.png'] + '" width="1" height="40" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:100%; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></span></a></address>',
-        '    </td>',
-        '  </tr>',
-        '</table>'
-      ].join('');
+      var stripeImg =
+        '<a name="sig-stripes" draggable="false" style="' + deadLinkStyle + ' line-height:40px;"><img src="' + srcMap['sig-stripes.png'] + '" width="' + imgWidth + '" height="40" alt="" draggable="false" style="display:block; border:none; width:' + imgWidth + 'px; min-width:' + imgWidth + 'px; max-width:none; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a>';
 
       // Inner table gives each left-column slice its own fixed-height TD with matching line-height for Classic Outlook (Word)
       var leftStackHtml = [
@@ -341,10 +326,10 @@ function applySignature(event, isFromChanged) {
         '<div style="' + sigTextStyle + '"><br></div>',
         '<div style="' + sigTextStyle + '">Kind regards,</div>',
         '<div style="' + sigTextStyle + '"><br></div>',
-        '<table cellpadding="0" cellspacing="0" border="0" width="670" bgcolor="#4f1113" style="width:670px; min-width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
+        '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; color:#efdfd4; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
         '  <tr>',
-        '    <td width="670" align="left" bgcolor="#4f1113" style="width:670px; min-width:100%; background-color:#4f1113; padding:0; font-size:0;">',
-        '      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:separate; border-spacing:0; background-color:#4f1113; font-size:0;">',
+        '    <td width="100%" align="left" bgcolor="#4f1113" style="width:100%; background-color:#4f1113; padding:0; font-size:0;">',
+        '      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; border-collapse:separate; border-spacing:0; background-color:#4f1113; font-size:0;">',
         '        <tr>',
         // SECTION 1A: Left 15px padding spacer (15 x 170)
         '          <td width="15" height="170" valign="top" bgcolor="#4f1113" style="width:15px; min-width:15px; max-width:15px; height:170px; padding:0; background-color:#4f1113; line-height:170px; mso-line-height-rule:exactly; font-size:1px;">',
@@ -367,8 +352,8 @@ function applySignature(event, isFromChanged) {
         '    </td>',
         '  </tr>',
         '  <tr>',
-        '    <td width="670" height="40" align="left" valign="top" bgcolor="#4f1113" style="width:670px; min-width:100%; height:40px; max-height:40px; background-color:#4f1113; padding:0; font-size:0;">',
-               stripesHtml,
+        '    <td width="100%" height="40" bgcolor="#4f1113" style="width:100%; height:40px; max-height:40px; background-color:#4f1113; padding:0; line-height:40px; mso-line-height-rule:exactly; font-size:1px;">',
+        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:670px; min-width:100%; height:40px; max-height:40px; overflow:hidden; background-color:#4f1113; line-height:40px; mso-line-height-rule:exactly; font-size:1px; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;">' + stripeImg + '</address>',
         '    </td>',
         '  </tr>',
         '</table>'
