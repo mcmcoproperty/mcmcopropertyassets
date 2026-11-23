@@ -45,6 +45,12 @@ var STAFF = {
     headerAlt: 'Accounts',
     phoneHref: 'tel:+61288536255',
     phoneAlt: '+61 2 8853 6255'
+  },
+  'trust@mcmanuscoproperty.com': {
+    folder: 'staff/accounts/',
+    headerAlt: 'Accounts',
+    phoneHref: 'tel:+61288536255',
+    phoneAlt: '+61 2 8853 6255'
   }
 };
 
