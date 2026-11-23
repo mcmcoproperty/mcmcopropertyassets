@@ -269,8 +269,8 @@ function applySignature(event, isFromChanged) {
       return;
     }
 
-    // Stripes split at x=669 so Classic Outlook (which ignores min-width) caps cleanly at 670px (669 + 1),
-    // while modern clients expand min-width to stretch seamlessly to 3000px.
+    // Stripes split at x=669: Classic Outlook ignores inline-block span width & percentage img width (capping at 669 + 1 = 670px),
+    // while modern clients expand the 2331px span and clip cleanly at the container edge.
     var stripeBaseWidth = 669;
     var stripeExtWidth = 2331;
     var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v1/';
@@ -302,7 +302,7 @@ function applySignature(event, isFromChanged) {
       var linkRowTdStyle = 'width:335px; min-width:335px; max-width:335px; height:26px; padding:0; background-color:#4f1113; line-height:26px; mso-line-height-rule:exactly; font-size:1px;';
       var linkRowStyle = 'display:block; font-style:normal; margin:0; padding:0; width:335px; max-width:335px; height:26px; max-height:26px; overflow:hidden; line-height:26px; mso-line-height-rule:exactly; font-size:1px; white-space:nowrap;';
 
-      // 2-column stripes bar: 669px fixed base + fluid extension (HTML width="1" caps Classic Outlook; CSS width expands in modern clients)
+      // 2-column stripes bar: 669px fixed base + fluid extension (1px in Classic Outlook, clipped 2331px in modern clients)
       var stripesHtml = [
         '<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#4f1113" style="width:100%; min-width:670px; table-layout:fixed; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; background-color:#4f1113;">',
         '  <tr>',
@@ -310,7 +310,7 @@ function applySignature(event, isFromChanged) {
         '      <address style="display:block; font-style:normal; margin:0; padding:0; width:' + stripeBaseWidth + 'px; max-width:' + stripeBaseWidth + 'px; height:40px; max-height:40px; overflow:hidden; line-height:40px; mso-line-height-rule:exactly; font-size:1px; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-stripes-base" draggable="false" style="' + deadLinkStyle + ' line-height:40px;"><img src="' + srcMap['sig-stripes-base.png'] + '" width="' + stripeBaseWidth + '" height="40" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:' + stripeBaseWidth + 'px; min-width:' + stripeBaseWidth + 'px; max-width:' + stripeBaseWidth + 'px; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
         '    </td>',
         '    <td height="40" valign="top" bgcolor="#4f1113" style="height:40px; padding:0; background-color:#4f1113; line-height:40px; mso-line-height-rule:exactly; font-size:1px;">',
-        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:40px; max-height:40px; overflow:hidden; line-height:40px; mso-line-height-rule:exactly; font-size:1px; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-stripes-ext" draggable="false" style="' + deadLinkStyle + ' line-height:40px;"><img src="' + srcMap['sig-stripes-ext.png'] + '" width="1" height="40" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:' + stripeExtWidth + 'px; min-width:' + stripeExtWidth + 'px; max-width:none; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
+        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:100%; height:40px; max-height:40px; overflow:hidden; line-height:40px; mso-line-height-rule:exactly; font-size:1px; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"><a name="sig-stripes-ext" draggable="false" style="' + deadLinkStyle + ' line-height:40px;"><span style="display:inline-block; width:' + stripeExtWidth + 'px; min-width:' + stripeExtWidth + 'px; height:40px; vertical-align:top; line-height:40px; font-size:1px;"><img src="' + srcMap['sig-stripes-ext.png'] + '" width="1" height="40" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:100%; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></span></a></address>',
         '    </td>',
         '  </tr>',
         '</table>'
