@@ -56,6 +56,36 @@ var STAFF = {
   */
 };
 
+var SIG_FILE_NAMES = {
+  'sig-stripes.png': true,
+  'sig-background.png': true,
+  'sig-bg-pad.png': true,
+  'sig-bg-left.png': true,
+  'sig-bg-mid.png': true,
+  'sig-header.png': true,
+  'sig-phone.png': true,
+  'sig-web.png': true,
+  'sig-address.png': true,
+  'sig-logo.png': true
+};
+
+function arrayBufferToBase64(buffer) {
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  var bytes = new Uint8Array(buffer);
+  var len = bytes.length;
+  var out = '';
+  for (var i = 0; i < len; i += 3) {
+    var b1 = bytes[i];
+    var b2 = i + 1 < len ? bytes[i + 1] : 0;
+    var b3 = i + 2 < len ? bytes[i + 2] : 0;
+    out += chars[b1 >> 2];
+    out += chars[((b1 & 3) << 4) | (b2 >> 4)];
+    out += i + 1 < len ? chars[((b2 & 15) << 2) | (b3 >> 6)] : '=';
+    out += i + 2 < len ? chars[b3 & 63] : '=';
+  }
+  return out;
+}
+
 function extractTextStyleFromCss(cssText, fallbackSize) {
   if (!cssText) {
     return null;
@@ -181,6 +211,43 @@ function resolveSenderEmail(item, callback) {
   }
 }
 
+function removeExistingSignatureAttachments(item, callback) {
+  if (!item || typeof item.getAttachmentsAsync !== 'function' || typeof item.removeAttachmentAsync !== 'function') {
+    callback();
+    return;
+  }
+
+  item.getAttachmentsAsync(function (result) {
+    if (result.status !== Office.AsyncResultStatus.Succeeded || !result.value || !result.value.length) {
+      callback();
+      return;
+    }
+
+    var toRemove = [];
+    for (var i = 0; i < result.value.length; i++) {
+      var att = result.value[i];
+      if (att.isInline && Object.prototype.hasOwnProperty.call(SIG_FILE_NAMES, att.name)) {
+        toRemove.push(att.id);
+      }
+    }
+
+    if (toRemove.length === 0) {
+      callback();
+      return;
+    }
+
+    var remaining = toRemove.length;
+    for (var j = 0; j < toRemove.length; j++) {
+      item.removeAttachmentAsync(toRemove[j], function () {
+        remaining--;
+        if (remaining === 0) {
+          callback();
+        }
+      });
+    }
+  });
+}
+
 function applySignature(event, isFromChanged) {
   var item = Office.context.mailbox && Office.context.mailbox.item;
 
@@ -189,12 +256,14 @@ function applySignature(event, isFromChanged) {
 
     console.log(userEmail);
 
-    // Unknown employee: on new compose exit cleanly; on From switch clear previous signature
+    // Unknown employee: on new compose exit cleanly; on From switch remove previous signature & attachments
     if (!person) {
       console.warn('No signature configured for:', userEmail || '(unknown user)');
       if (isFromChanged && item && item.body && typeof item.body.setSignatureAsync === 'function') {
-        item.body.setSignatureAsync('', { coercionType: Office.CoercionType.Html }, function () {
-          event.completed();
+        removeExistingSignatureAttachments(item, function () {
+          item.body.setSignatureAsync('', { coercionType: Office.CoercionType.Html }, function () {
+            event.completed();
+          });
         });
       } else {
         event.completed();
@@ -202,24 +271,32 @@ function applySignature(event, isFromChanged) {
       return;
     }
 
-    // Fixed 672x204 card: all dimensions divisible by 12 (exact Word inches at 96 DPI + crisp 125%/150%/200% scaling),
+    // Fixed 672x216 card: all dimensions divisible by 12 (exact Word inches at 96 DPI + crisp 125%/150%/200% scaling),
     // and all row heights >= 24px (above <address>'s ~17px fallback baseline on Classic Outlook Reply/Forward).
     // Widths: 12 (left pad) + 336 (info) + 60 (mid pad) + 264 (logo) = 672 (56 exact 12px stripes).
-    // Heights: 84 (top pad + header) + 24 (phone) + 24 (web) + 36 (address + bottom pad) = 168, plus 36 (stripes) = 204.
+    // Heights: 84 (top pad + header) + 24 (phone) + 24 (web) + 36 (address + bottom pad) = 168, plus 48 (stripes) = 216.
     var cardWidth = 672;
     var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v2/';
     var personBase = base + (person.folder || '');
 
-    var srcMap = {
-      'sig-stripes.png': base + 'sig-stripes.png',
-      'sig-bg-left.png': base + 'sig-bg-left.png',
-      'sig-bg-mid.png':  base + 'sig-bg-mid.png',
-      'sig-header.png':  personBase + 'sig-header.png',
-      'sig-phone.png':   personBase + 'sig-phone.png',
-      'sig-web.png':     base + 'sig-web.png',
-      'sig-address.png': base + 'sig-address.png',
-      'sig-logo.png':    base + 'sig-logo.png'
-    };
+    // Keep `name` as a plain filename (no slashes) and give every <img> its own unique cid: file
+    // at exact aspect ratio so Gmail mobile replies never drop duplicate CIDs or rescale height:auto.
+    var files = [
+      { name: 'sig-stripes.png',  url: base + 'sig-stripes.png' },
+      { name: 'sig-bg-left.png',  url: base + 'sig-bg-left.png' },
+      { name: 'sig-bg-mid.png',   url: base + 'sig-bg-mid.png' },
+      { name: 'sig-header.png',   url: personBase + 'sig-header.png' },
+      { name: 'sig-phone.png',    url: personBase + 'sig-phone.png' },
+      { name: 'sig-web.png',      url: base + 'sig-web.png' },
+      { name: 'sig-address.png',  url: base + 'sig-address.png' },
+      { name: 'sig-logo.png',     url: base + 'sig-logo.png' }
+    ];
+
+    // Default to external URLs; switch each to cid: once attached inline
+    var srcMap = {};
+    for (var i = 0; i < files.length; i++) {
+      srcMap[files[i].name] = files[i].url;
+    }
 
     var sigTextStyle = 'font-family:Aptos, Calibri, Helvetica, Arial, sans-serif; font-size:12pt; color:#000000;';
 
@@ -242,7 +319,7 @@ function applySignature(event, isFromChanged) {
       }
 
       var stripeImg =
-        '<address style="' + deadAddrStyle(cardWidth, 36) + '"><a name="sig-stripes" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-stripes.png'] + '" width="' + cardWidth + '" height="36" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:36px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>';
+        '<address style="' + deadAddrStyle(cardWidth, 48) + '"><a name="sig-stripes" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-stripes.png'] + '" width="' + cardWidth + '" height="48" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:48px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>';
 
       // Inner table gives each left-column slice its own fixed-height TD (336 x 168 total)
       var leftStackHtml = [
@@ -279,7 +356,7 @@ function applySignature(event, isFromChanged) {
         '    </td>',
         '  </tr>',
         '  <tr>',
-        '    <td colspan="4" width="' + cardWidth + '" height="36" align="left" valign="top" style="width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:36px; padding:0; line-height:1px; font-size:1px;">',
+        '    <td colspan="4" width="' + cardWidth + '" height="48" align="left" valign="top" style="width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:48px; padding:0; line-height:1px; font-size:1px;">',
                stripeImg,
         '    </td>',
         '  </tr>',
@@ -298,9 +375,107 @@ function applySignature(event, isFromChanged) {
       );
     }
 
+    function attachAllAndInsert() {
+      var canUrlAttach = item && typeof item.addFileAttachmentAsync === 'function';
+      var canBase64Attach = item && typeof item.addFileAttachmentFromBase64Async === 'function';
+
+      if (!canUrlAttach && !canBase64Attach) {
+        insertSignature();
+        return;
+      }
+
+      var platform = Office.context.diagnostics && Office.context.diagnostics.platform;
+      var isMobile =
+        typeof Office.PlatformType !== 'undefined' &&
+        (platform === Office.PlatformType.iOS || platform === Office.PlatformType.Android);
+
+      var remaining = files.length;
+
+      function onFileDone() {
+        remaining--;
+        if (remaining === 0) {
+          insertSignature();
+        }
+      }
+
+      function attachViaBase64(file) {
+        if (!canBase64Attach || typeof XMLHttpRequest === 'undefined') {
+          onFileDone();
+          return;
+        }
+
+        try {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', file.url, true);
+          xhr.responseType = 'arraybuffer';
+          xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
+              var base64 = arrayBufferToBase64(xhr.response);
+              item.addFileAttachmentFromBase64Async(
+                base64,
+                file.name,
+                { isInline: true },
+                function (result) {
+                  if (result.status === Office.AsyncResultStatus.Succeeded) {
+                    srcMap[file.name] = 'cid:' + file.name;
+                  } else {
+                    console.error('addFileAttachmentFromBase64Async failed for ' + file.name + ':', result.error.message);
+                  }
+                  onFileDone();
+                }
+              );
+            } else {
+              console.error('Image fetch failed for ' + file.name + ': HTTP ' + xhr.status);
+              onFileDone();
+            }
+          };
+          xhr.onerror = function () {
+            console.error('Network error fetching ' + file.name);
+            onFileDone();
+          };
+          xhr.send();
+        } catch (err) {
+          console.error('Base64 attach error for ' + file.name + ':', err);
+          onFileDone();
+        }
+      }
+
+      function attachFile(file) {
+        if (isMobile || !canUrlAttach) {
+          attachViaBase64(file);
+          return;
+        }
+
+        item.addFileAttachmentAsync(
+          file.url,
+          file.name,
+          { isInline: true },
+          function (result) {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+              srcMap[file.name] = 'cid:' + file.name;
+              onFileDone();
+            } else if (canBase64Attach) {
+              attachViaBase64(file);
+            } else {
+              console.error('addFileAttachmentAsync failed for ' + file.name + ':', result.error.message);
+              onFileDone();
+            }
+          }
+        );
+      }
+
+      for (var j = 0; j < files.length; j++) {
+        attachFile(files[j]);
+      }
+    }
+
     detectDefaultTextStyle(item, function (detectedStyle) {
       sigTextStyle = detectedStyle;
-      insertSignature();
+      if (isFromChanged) {
+        removeExistingSignatureAttachments(item, attachAllAndInsert);
+      } else {
+        attachAllAndInsert();
+      }
     });
   });
 }
