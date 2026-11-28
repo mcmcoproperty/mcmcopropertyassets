@@ -269,9 +269,10 @@ function applySignature(event, isFromChanged) {
       return;
     }
 
-    // Fixed 672x216 card: all dimensions divisible by 4 for crisp 125%/150%/200% DPI scaling.
-    // Widths: 16 (left pad) + 336 (info) + 60 (mid pad) + 260 (logo) = 672 (56 exact 12px stripes).
-    // Heights: 16 (top) + 68 (header) + 28 + 28 + 28 (links) + 8 (bottom) = 176, plus 40 (stripes) = 216.
+    // Fixed 672x204 card: all dimensions divisible by 12 (exact Word inches at 96 DPI + crisp 125%/150%/200% scaling),
+    // and all row heights >= 24px (above <address>'s ~17px fallback baseline on Classic Outlook Reply/Forward).
+    // Widths: 12 (left pad) + 336 (info) + 60 (mid pad) + 264 (logo) = 672 (56 exact 12px stripes).
+    // Heights: 84 (top pad + header) + 24 (phone) + 24 (web) + 36 (address + bottom pad) = 168, plus 36 (stripes) = 204.
     var cardWidth = 672;
     var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v2/';
     var personBase = base + (person.folder || '');
@@ -300,25 +301,29 @@ function applySignature(event, isFromChanged) {
       // and HTML align="top" on every <img> so Classic Outlook Reply/Forward preserves box height and kills descender gaps.
       var deadLinkStyle = 'display:block; border:none; text-decoration:none; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none; line-height:1px; font-size:1px;';
       var linkAnchorStyle = 'display:block; border:none; text-decoration:none; line-height:1px; font-size:1px;';
-      var linkRowTdStyle = 'width:336px; min-width:336px; max-width:336px; height:28px; padding:0; line-height:1px; font-size:1px;';
-      var linkAddrStyle = 'display:block; font-style:normal; margin:0; padding:0; width:336px; max-width:336px; height:28px; max-height:28px; overflow:hidden; line-height:1px; font-size:1px; white-space:nowrap;';
+
+      function linkTdStyle(h) {
+        return 'width:336px; min-width:336px; max-width:336px; height:' + h + 'px; padding:0; line-height:1px; font-size:1px;';
+      }
+
+      function linkAddrStyle(h) {
+        return 'display:block; font-style:normal; margin:0; padding:0; width:336px; max-width:336px; height:' + h + 'px; max-height:' + h + 'px; overflow:hidden; line-height:1px; font-size:1px; white-space:nowrap;';
+      }
 
       function deadAddrStyle(w, h) {
         return 'display:block; font-style:normal; margin:0; padding:0; width:' + w + 'px; max-width:' + w + 'px; height:' + h + 'px; max-height:' + h + 'px; overflow:hidden; line-height:1px; font-size:1px; pointer-events:none; cursor:default; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;';
       }
 
       var stripeImg =
-        '<address style="' + deadAddrStyle(cardWidth, 40) + '"><a name="sig-stripes" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-stripes.png'] + '" width="' + cardWidth + '" height="40" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:40px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>';
+        '<address style="' + deadAddrStyle(cardWidth, 36) + '"><a name="sig-stripes" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-stripes.png'] + '" width="' + cardWidth + '" height="36" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:36px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>';
 
-      // Inner table gives each left-column slice its own fixed-height TD (336 x 176 total)
+      // Inner table gives each left-column slice its own fixed-height TD (336 x 168 total)
       var leftStackHtml = [
         '<table cellpadding="0" cellspacing="0" border="0" width="336" style="width:336px; min-width:336px; max-width:336px; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">',
-        '  <tr><td width="336" height="16" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:16px; padding:0; line-height:1px; font-size:1px;"><address style="' + deadAddrStyle(336, 16) + '"><a name="sig-bg-top" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="336" height="16" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:16px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address></td></tr>',
-        '  <tr><td width="336" height="68" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:68px; padding:0; line-height:1px; font-size:1px;"><address style="' + deadAddrStyle(336, 68) + '"><a name="sig-header" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-header.png'] + '" width="336" height="68" border="0" align="top" alt="' + person.headerAlt + '" draggable="false" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:68px; color:#4f1113; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address></td></tr>',
-        '  <tr><td width="336" height="28" align="left" valign="top" style="' + linkRowTdStyle + '"><address style="' + linkAddrStyle + '"><a href="' + person.phoneHref + '" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-phone.png'] + '" width="336" height="28" border="0" align="top" alt="' + person.phoneAlt + '" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:28px; color:#4f1113;"></a></address></td></tr>',
-        '  <tr><td width="336" height="28" align="left" valign="top" style="' + linkRowTdStyle + '"><address style="' + linkAddrStyle + '"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-web.png'] + '" width="336" height="28" border="0" align="top" alt="mcmanuscoproperty.com.au" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:28px; color:#4f1113;"></a></address></td></tr>',
-        '  <tr><td width="336" height="28" align="left" valign="top" style="' + linkRowTdStyle + '"><address style="' + linkAddrStyle + '"><a href="https://maps.google.com/?q=48+Sailors+Bay+Road,+Northbridge+NSW+2063" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-address.png'] + '" width="336" height="28" border="0" align="top" alt="48 Sailors Bay Road, Northbridge NSW 2063" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:28px; color:#4f1113;"></a></address></td></tr>',
-        '  <tr><td width="336" height="8" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:8px; padding:0; line-height:1px; font-size:1px;"><address style="' + deadAddrStyle(336, 8) + '"><a name="sig-bg-bottom" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="336" height="8" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:8px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address></td></tr>',
+        '  <tr><td width="336" height="84" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:84px; padding:0; line-height:1px; font-size:1px;"><address style="' + deadAddrStyle(336, 84) + '"><a name="sig-header" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-header.png'] + '" width="336" height="84" border="0" align="top" alt="' + person.headerAlt + '" draggable="false" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:84px; color:#4f1113; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address></td></tr>',
+        '  <tr><td width="336" height="24" align="left" valign="top" style="' + linkTdStyle(24) + '"><address style="' + linkAddrStyle(24) + '"><a href="' + person.phoneHref + '" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-phone.png'] + '" width="336" height="24" border="0" align="top" alt="' + person.phoneAlt + '" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:24px; color:#4f1113;"></a></address></td></tr>',
+        '  <tr><td width="336" height="24" align="left" valign="top" style="' + linkTdStyle(24) + '"><address style="' + linkAddrStyle(24) + '"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-web.png'] + '" width="336" height="24" border="0" align="top" alt="mcmanuscoproperty.com.au" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:24px; color:#4f1113;"></a></address></td></tr>',
+        '  <tr><td width="336" height="36" align="left" valign="top" style="' + linkTdStyle(36) + '"><address style="' + linkAddrStyle(36) + '"><a href="https://maps.google.com/?q=48+Sailors+Bay+Road,+Northbridge+NSW+2063" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-address.png'] + '" width="336" height="36" border="0" align="top" alt="48 Sailors Bay Road, Northbridge NSW 2063" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:36px; color:#4f1113;"></a></address></td></tr>',
         '</table>'
       ].join('');
 
@@ -329,25 +334,25 @@ function applySignature(event, isFromChanged) {
         '<div style="' + sigTextStyle + '"><br></div>',
         '<table cellpadding="0" cellspacing="0" border="0" width="' + cardWidth + '" style="width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; color:#4f1113; font-family:\'Century Gothic\', Helvetica, Arial, sans-serif; -webkit-text-size-adjust:100%;">',
         '  <tr>',
-        // SECTION 1A: Fixed Left Padding Spacer (16 x 176)
-        '    <td width="16" height="176" align="left" valign="top" style="width:16px; min-width:16px; max-width:16px; height:176px; padding:0; line-height:1px; font-size:1px;">',
-        '      <address style="' + deadAddrStyle(16, 176) + '"><a name="sig-bg-left" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="16" height="176" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:16px; min-width:16px; max-width:16px; height:176px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
+        // SECTION 1A: Fixed Left Padding Spacer (12 x 168)
+        '    <td width="12" height="168" align="left" valign="top" style="width:12px; min-width:12px; max-width:12px; height:168px; padding:0; line-height:1px; font-size:1px;">',
+        '      <address style="' + deadAddrStyle(12, 168) + '"><a name="sig-bg-left" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="12" height="168" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:12px; min-width:12px; max-width:12px; height:168px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
         '    </td>',
-        // SECTION 1B: Fixed Left Info Stacked in an Inner Table (336 x 176 total)
-        '    <td width="336" height="176" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:176px; padding:0; line-height:1px; font-size:1px;">',
+        // SECTION 1B: Fixed Left Info Stacked in an Inner Table (336 x 168 total)
+        '    <td width="336" height="168" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:168px; padding:0; line-height:1px; font-size:1px;">',
                leftStackHtml,
         '    </td>',
-        // SECTION 2: Fixed Middle Spacer (60 x 176)
-        '    <td width="60" height="176" align="left" valign="top" style="width:60px; min-width:60px; max-width:60px; height:176px; padding:0; line-height:1px; font-size:1px;">',
-        '      <address style="' + deadAddrStyle(60, 176) + '"><a name="sig-bg-mid" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="60" height="176" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:60px; min-width:60px; max-width:60px; height:176px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
+        // SECTION 2: Fixed Middle Spacer (60 x 168)
+        '    <td width="60" height="168" align="left" valign="top" style="width:60px; min-width:60px; max-width:60px; height:168px; padding:0; line-height:1px; font-size:1px;">',
+        '      <address style="' + deadAddrStyle(60, 168) + '"><a name="sig-bg-mid" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="60" height="168" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:60px; min-width:60px; max-width:60px; height:168px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
         '    </td>',
-        // SECTION 3: Fixed Right Logo + Margin (260 x 176)
-        '    <td width="260" height="176" align="left" valign="top" style="width:260px; min-width:260px; max-width:260px; height:176px; padding:0; line-height:1px; font-size:1px;">',
-        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:260px; max-width:260px; height:176px; max-height:176px; overflow:hidden; line-height:1px; font-size:1px; white-space:nowrap;"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-logo.png'] + '" width="260" height="176" border="0" align="top" alt="McManus &amp; Co Property" style="display:block; vertical-align:top; border:none; width:260px; min-width:260px; max-width:260px; height:176px; color:#4f1113;"></a></address>',
+        // SECTION 3: Fixed Right Logo + Margin (264 x 168)
+        '    <td width="264" height="168" align="left" valign="top" style="width:264px; min-width:264px; max-width:264px; height:168px; padding:0; line-height:1px; font-size:1px;">',
+        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:264px; max-width:264px; height:168px; max-height:168px; overflow:hidden; line-height:1px; font-size:1px; white-space:nowrap;"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-logo.png'] + '" width="264" height="168" border="0" align="top" alt="McManus &amp; Co Property" style="display:block; vertical-align:top; border:none; width:264px; min-width:264px; max-width:264px; height:168px; color:#4f1113;"></a></address>',
         '    </td>',
         '  </tr>',
         '  <tr>',
-        '    <td colspan="4" width="' + cardWidth + '" height="40" align="left" valign="top" style="width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:40px; padding:0; line-height:1px; font-size:1px;">',
+        '    <td colspan="4" width="' + cardWidth + '" height="36" align="left" valign="top" style="width:' + cardWidth + 'px; min-width:' + cardWidth + 'px; max-width:' + cardWidth + 'px; height:36px; padding:0; line-height:1px; font-size:1px;">',
                stripeImg,
         '    </td>',
         '  </tr>',
