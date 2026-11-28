@@ -1,7 +1,7 @@
 Office.onReady();
 
 // Per-employee directory keyed by lowercase Microsoft 365 email address.
-// Shared assets (stripes, bg-pad, web, address, logo) stay in the root folder.
+// Shared assets (stripes, bg-left, bg-mid, web, address, logo) stay in the root folder.
 // For future staff, set folder to e.g. 'staff/james/' and upload their sig-header.png and sig-phone.png there.
 var STAFF = {
   'louise@mcmanuscoproperty.com': {
@@ -60,6 +60,8 @@ var SIG_FILE_NAMES = {
   'sig-stripes.png': true,
   'sig-background.png': true,
   'sig-bg-pad.png': true,
+  'sig-bg-left.png': true,
+  'sig-bg-mid.png': true,
   'sig-header.png': true,
   'sig-phone.png': true,
   'sig-web.png': true,
@@ -277,10 +279,12 @@ function applySignature(event, isFromChanged) {
     var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v2/';
     var personBase = base + (person.folder || '');
 
-    // Keep `name` as a plain filename (no slashes) for valid cid: references
+    // Keep `name` as a plain filename (no slashes) and give every <img> its own unique cid: file
+    // at exact aspect ratio so Gmail mobile replies never drop duplicate CIDs or rescale height:auto.
     var files = [
       { name: 'sig-stripes.png',  url: base + 'sig-stripes.png' },
-      { name: 'sig-bg-pad.png',   url: base + 'sig-bg-pad.png' },
+      { name: 'sig-bg-left.png',  url: base + 'sig-bg-left.png' },
+      { name: 'sig-bg-mid.png',   url: base + 'sig-bg-mid.png' },
       { name: 'sig-header.png',   url: personBase + 'sig-header.png' },
       { name: 'sig-phone.png',    url: personBase + 'sig-phone.png' },
       { name: 'sig-web.png',      url: base + 'sig-web.png' },
@@ -336,7 +340,7 @@ function applySignature(event, isFromChanged) {
         '  <tr>',
         // SECTION 1A: Fixed Left Padding Spacer (12 x 168)
         '    <td width="12" height="168" align="left" valign="top" style="width:12px; min-width:12px; max-width:12px; height:168px; padding:0; line-height:1px; font-size:1px;">',
-        '      <address style="' + deadAddrStyle(12, 168) + '"><a name="sig-bg-left" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="12" height="168" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:12px; min-width:12px; max-width:12px; height:168px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
+        '      <address style="' + deadAddrStyle(12, 168) + '"><a name="sig-bg-left" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-left.png'] + '" width="12" height="168" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:12px; min-width:12px; max-width:12px; height:168px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
         '    </td>',
         // SECTION 1B: Fixed Left Info Stacked in an Inner Table (336 x 168 total)
         '    <td width="336" height="168" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:168px; padding:0; line-height:1px; font-size:1px;">',
@@ -344,7 +348,7 @@ function applySignature(event, isFromChanged) {
         '    </td>',
         // SECTION 2: Fixed Middle Spacer (60 x 168)
         '    <td width="60" height="168" align="left" valign="top" style="width:60px; min-width:60px; max-width:60px; height:168px; padding:0; line-height:1px; font-size:1px;">',
-        '      <address style="' + deadAddrStyle(60, 168) + '"><a name="sig-bg-mid" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-pad.png'] + '" width="60" height="168" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:60px; min-width:60px; max-width:60px; height:168px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
+        '      <address style="' + deadAddrStyle(60, 168) + '"><a name="sig-bg-mid" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-bg-mid.png'] + '" width="60" height="168" border="0" align="top" alt="" draggable="false" style="display:block; vertical-align:top; border:none; width:60px; min-width:60px; max-width:60px; height:168px; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address>',
         '    </td>',
         // SECTION 3: Fixed Right Logo + Margin (264 x 168)
         '    <td width="264" height="168" align="left" valign="top" style="width:264px; min-width:264px; max-width:264px; height:168px; padding:0; line-height:1px; font-size:1px;">',
