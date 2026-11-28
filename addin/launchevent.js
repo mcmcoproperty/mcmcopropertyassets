@@ -273,7 +273,7 @@ function applySignature(event, isFromChanged) {
     // Widths: 16 (left pad) + 336 (info) + 60 (mid pad) + 260 (logo) = 672 (56 exact 12px stripes).
     // Heights: 16 (top) + 68 (header) + 28 + 28 + 28 (links) + 8 (bottom) = 176, plus 40 (stripes) = 216.
     var cardWidth = 672;
-    var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v1/';
+    var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v2/';
     var personBase = base + (person.folder || '');
 
     // Keep `name` as a plain filename (no slashes) for valid cid: references
