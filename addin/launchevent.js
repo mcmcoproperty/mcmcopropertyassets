@@ -56,36 +56,6 @@ var STAFF = {
   */
 };
 
-var SIG_FILE_NAMES = {
-  'sig-stripes.png': true,
-  'sig-background.png': true,
-  'sig-bg-pad.png': true,
-  'sig-bg-left.png': true,
-  'sig-bg-mid.png': true,
-  'sig-header.png': true,
-  'sig-phone.png': true,
-  'sig-web.png': true,
-  'sig-address.png': true,
-  'sig-logo.png': true
-};
-
-function arrayBufferToBase64(buffer) {
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  var bytes = new Uint8Array(buffer);
-  var len = bytes.length;
-  var out = '';
-  for (var i = 0; i < len; i += 3) {
-    var b1 = bytes[i];
-    var b2 = i + 1 < len ? bytes[i + 1] : 0;
-    var b3 = i + 2 < len ? bytes[i + 2] : 0;
-    out += chars[b1 >> 2];
-    out += chars[((b1 & 3) << 4) | (b2 >> 4)];
-    out += i + 1 < len ? chars[((b2 & 15) << 2) | (b3 >> 6)] : '=';
-    out += i + 2 < len ? chars[b3 & 63] : '=';
-  }
-  return out;
-}
-
 function extractTextStyleFromCss(cssText, fallbackSize) {
   if (!cssText) {
     return null;
@@ -211,43 +181,6 @@ function resolveSenderEmail(item, callback) {
   }
 }
 
-function removeExistingSignatureAttachments(item, callback) {
-  if (!item || typeof item.getAttachmentsAsync !== 'function' || typeof item.removeAttachmentAsync !== 'function') {
-    callback();
-    return;
-  }
-
-  item.getAttachmentsAsync(function (result) {
-    if (result.status !== Office.AsyncResultStatus.Succeeded || !result.value || !result.value.length) {
-      callback();
-      return;
-    }
-
-    var toRemove = [];
-    for (var i = 0; i < result.value.length; i++) {
-      var att = result.value[i];
-      if (att.isInline && Object.prototype.hasOwnProperty.call(SIG_FILE_NAMES, att.name)) {
-        toRemove.push(att.id);
-      }
-    }
-
-    if (toRemove.length === 0) {
-      callback();
-      return;
-    }
-
-    var remaining = toRemove.length;
-    for (var j = 0; j < toRemove.length; j++) {
-      item.removeAttachmentAsync(toRemove[j], function () {
-        remaining--;
-        if (remaining === 0) {
-          callback();
-        }
-      });
-    }
-  });
-}
-
 function applySignature(event, isFromChanged) {
   var item = Office.context.mailbox && Office.context.mailbox.item;
 
@@ -256,14 +189,12 @@ function applySignature(event, isFromChanged) {
 
     console.log(userEmail);
 
-    // Unknown employee: on new compose exit cleanly; on From switch remove previous signature & attachments
+    // Unknown employee: on new compose exit cleanly; on From switch clear previous signature
     if (!person) {
       console.warn('No signature configured for:', userEmail || '(unknown user)');
       if (isFromChanged && item && item.body && typeof item.body.setSignatureAsync === 'function') {
-        removeExistingSignatureAttachments(item, function () {
-          item.body.setSignatureAsync('', { coercionType: Office.CoercionType.Html }, function () {
-            event.completed();
-          });
+        item.body.setSignatureAsync('', { coercionType: Office.CoercionType.Html }, function () {
+          event.completed();
         });
       } else {
         event.completed();
@@ -279,24 +210,16 @@ function applySignature(event, isFromChanged) {
     var base = 'https://mcmcoproperty.github.io/mcmcopropertyassets/v2/';
     var personBase = base + (person.folder || '');
 
-    // Keep `name` as a plain filename (no slashes) and give every <img> its own unique cid: file
-    // at exact aspect ratio so Gmail mobile replies never drop duplicate CIDs or rescale height:auto.
-    var files = [
-      { name: 'sig-stripes.png',  url: base + 'sig-stripes.png' },
-      { name: 'sig-bg-left.png',  url: base + 'sig-bg-left.png' },
-      { name: 'sig-bg-mid.png',   url: base + 'sig-bg-mid.png' },
-      { name: 'sig-header.png',   url: personBase + 'sig-header.png' },
-      { name: 'sig-phone.png',    url: personBase + 'sig-phone.png' },
-      { name: 'sig-web.png',      url: base + 'sig-web.png' },
-      { name: 'sig-address.png',  url: base + 'sig-address.png' },
-      { name: 'sig-logo.png',     url: base + 'sig-logo.png' }
-    ];
-
-    // Default to external URLs; switch each to cid: once attached inline
-    var srcMap = {};
-    for (var i = 0; i < files.length; i++) {
-      srcMap[files[i].name] = files[i].url;
-    }
+    var srcMap = {
+      'sig-stripes.png': base + 'sig-stripes.png',
+      'sig-bg-left.png': base + 'sig-bg-left.png',
+      'sig-bg-mid.png':  base + 'sig-bg-mid.png',
+      'sig-header.png':  personBase + 'sig-header.png',
+      'sig-phone.png':   personBase + 'sig-phone.png',
+      'sig-web.png':     base + 'sig-web.png',
+      'sig-address.png': base + 'sig-address.png',
+      'sig-logo.png':    base + 'sig-logo.png'
+    };
 
     var sigTextStyle = 'font-family:Aptos, Calibri, Helvetica, Arial, sans-serif; font-size:12pt; color:#000000;';
 
@@ -324,10 +247,10 @@ function applySignature(event, isFromChanged) {
       // Inner table gives each left-column slice its own fixed-height TD (336 x 168 total)
       var leftStackHtml = [
         '<table cellpadding="0" cellspacing="0" border="0" width="336" style="width:336px; min-width:336px; max-width:336px; border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;">',
-        '  <tr><td width="336" height="84" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:84px; padding:0; line-height:1px; font-size:1px;"><address style="' + deadAddrStyle(336, 84) + '"><a name="sig-header" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-header.png'] + '" width="336" height="84" border="0" align="top" alt="' + person.headerAlt + '" draggable="false" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:84px; color:#4f1113; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address></td></tr>',
-        '  <tr><td width="336" height="24" align="left" valign="top" style="' + linkTdStyle(24) + '"><address style="' + linkAddrStyle(24) + '"><a href="' + person.phoneHref + '" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-phone.png'] + '" width="336" height="24" border="0" align="top" alt="' + person.phoneAlt + '" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:24px; color:#4f1113;"></a></address></td></tr>',
-        '  <tr><td width="336" height="24" align="left" valign="top" style="' + linkTdStyle(24) + '"><address style="' + linkAddrStyle(24) + '"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-web.png'] + '" width="336" height="24" border="0" align="top" alt="mcmanuscoproperty.com.au" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:24px; color:#4f1113;"></a></address></td></tr>',
-        '  <tr><td width="336" height="36" align="left" valign="top" style="' + linkTdStyle(36) + '"><address style="' + linkAddrStyle(36) + '"><a href="https://maps.google.com/?q=48+Sailors+Bay+Road,+Northbridge+NSW+2063" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-address.png'] + '" width="336" height="36" border="0" align="top" alt="48 Sailors Bay Road, Northbridge NSW 2063" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:36px; color:#4f1113;"></a></address></td></tr>',
+        '  <tr><td width="336" height="84" align="left" valign="top" style="width:336px; min-width:336px; max-width:336px; height:84px; padding:0; line-height:1px; font-size:1px;"><address style="' + deadAddrStyle(336, 84) + '"><a name="sig-header" draggable="false" style="' + deadLinkStyle + '"><img src="' + srcMap['sig-header.png'] + '" width="336" height="84" border="0" align="top" alt="' + person.headerAlt + '" draggable="false" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:84px; font-size:14px; line-height:20px; color:#4f1113; cursor:default; pointer-events:none; -webkit-user-drag:none; user-select:none; -webkit-user-select:none;"></a></address></td></tr>',
+        '  <tr><td width="336" height="24" align="left" valign="top" style="' + linkTdStyle(24) + '"><address style="' + linkAddrStyle(24) + '"><a href="' + person.phoneHref + '" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-phone.png'] + '" width="336" height="24" border="0" align="top" alt="' + person.phoneAlt + '" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:24px; font-size:12px; line-height:18px; color:#4f1113;"></a></address></td></tr>',
+        '  <tr><td width="336" height="24" align="left" valign="top" style="' + linkTdStyle(24) + '"><address style="' + linkAddrStyle(24) + '"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-web.png'] + '" width="336" height="24" border="0" align="top" alt="mcmanuscoproperty.com.au" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:24px; font-size:12px; line-height:18px; color:#4f1113;"></a></address></td></tr>',
+        '  <tr><td width="336" height="36" align="left" valign="top" style="' + linkTdStyle(36) + '"><address style="' + linkAddrStyle(36) + '"><a href="https://maps.google.com/?q=48+Sailors+Bay+Road,+Northbridge+NSW+2063" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-address.png'] + '" width="336" height="36" border="0" align="top" alt="48 Sailors Bay Road, Northbridge NSW 2063" style="display:block; vertical-align:top; border:none; width:336px; min-width:336px; max-width:336px; height:36px; font-size:12px; line-height:18px; color:#4f1113;"></a></address></td></tr>',
         '</table>'
       ].join('');
 
@@ -352,7 +275,7 @@ function applySignature(event, isFromChanged) {
         '    </td>',
         // SECTION 3: Fixed Right Logo + Margin (264 x 168)
         '    <td width="264" height="168" align="left" valign="top" style="width:264px; min-width:264px; max-width:264px; height:168px; padding:0; line-height:1px; font-size:1px;">',
-        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:264px; max-width:264px; height:168px; max-height:168px; overflow:hidden; line-height:1px; font-size:1px; white-space:nowrap;"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-logo.png'] + '" width="264" height="168" border="0" align="top" alt="McManus &amp; Co Property" style="display:block; vertical-align:top; border:none; width:264px; min-width:264px; max-width:264px; height:168px; color:#4f1113;"></a></address>',
+        '      <address style="display:block; font-style:normal; margin:0; padding:0; width:264px; max-width:264px; height:168px; max-height:168px; overflow:hidden; line-height:1px; font-size:1px; white-space:nowrap;"><a href="https://mcmanuscoproperty.com.au" style="' + linkAnchorStyle + '"><img src="' + srcMap['sig-logo.png'] + '" width="264" height="168" border="0" align="top" alt="McManus &amp; Co Property" style="display:block; vertical-align:top; border:none; width:264px; min-width:264px; max-width:264px; height:168px; font-size:14px; line-height:20px; color:#4f1113;"></a></address>',
         '    </td>',
         '  </tr>',
         '  <tr>',
@@ -375,107 +298,9 @@ function applySignature(event, isFromChanged) {
       );
     }
 
-    function attachAllAndInsert() {
-      var canUrlAttach = item && typeof item.addFileAttachmentAsync === 'function';
-      var canBase64Attach = item && typeof item.addFileAttachmentFromBase64Async === 'function';
-
-      if (!canUrlAttach && !canBase64Attach) {
-        insertSignature();
-        return;
-      }
-
-      var platform = Office.context.diagnostics && Office.context.diagnostics.platform;
-      var isMobile =
-        typeof Office.PlatformType !== 'undefined' &&
-        (platform === Office.PlatformType.iOS || platform === Office.PlatformType.Android);
-
-      var remaining = files.length;
-
-      function onFileDone() {
-        remaining--;
-        if (remaining === 0) {
-          insertSignature();
-        }
-      }
-
-      function attachViaBase64(file) {
-        if (!canBase64Attach || typeof XMLHttpRequest === 'undefined') {
-          onFileDone();
-          return;
-        }
-
-        try {
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', file.url, true);
-          xhr.responseType = 'arraybuffer';
-          xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
-              var base64 = arrayBufferToBase64(xhr.response);
-              item.addFileAttachmentFromBase64Async(
-                base64,
-                file.name,
-                { isInline: true },
-                function (result) {
-                  if (result.status === Office.AsyncResultStatus.Succeeded) {
-                    srcMap[file.name] = 'cid:' + file.name;
-                  } else {
-                    console.error('addFileAttachmentFromBase64Async failed for ' + file.name + ':', result.error.message);
-                  }
-                  onFileDone();
-                }
-              );
-            } else {
-              console.error('Image fetch failed for ' + file.name + ': HTTP ' + xhr.status);
-              onFileDone();
-            }
-          };
-          xhr.onerror = function () {
-            console.error('Network error fetching ' + file.name);
-            onFileDone();
-          };
-          xhr.send();
-        } catch (err) {
-          console.error('Base64 attach error for ' + file.name + ':', err);
-          onFileDone();
-        }
-      }
-
-      function attachFile(file) {
-        if (isMobile || !canUrlAttach) {
-          attachViaBase64(file);
-          return;
-        }
-
-        item.addFileAttachmentAsync(
-          file.url,
-          file.name,
-          { isInline: true },
-          function (result) {
-            if (result.status === Office.AsyncResultStatus.Succeeded) {
-              srcMap[file.name] = 'cid:' + file.name;
-              onFileDone();
-            } else if (canBase64Attach) {
-              attachViaBase64(file);
-            } else {
-              console.error('addFileAttachmentAsync failed for ' + file.name + ':', result.error.message);
-              onFileDone();
-            }
-          }
-        );
-      }
-
-      for (var j = 0; j < files.length; j++) {
-        attachFile(files[j]);
-      }
-    }
-
     detectDefaultTextStyle(item, function (detectedStyle) {
       sigTextStyle = detectedStyle;
-      if (isFromChanged) {
-        removeExistingSignatureAttachments(item, attachAllAndInsert);
-      } else {
-        attachAllAndInsert();
-      }
+      insertSignature();
     });
   });
 }
